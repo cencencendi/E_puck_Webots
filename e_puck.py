@@ -2,6 +2,9 @@ from controller import Robot
 import numpy as np
 from PID_controller import PID
 import time
+from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
+from matplotlib import collections as mc
 
 class Epuck(Robot):
     def __init__(self, TIME_STEP):
@@ -9,6 +12,7 @@ class Epuck(Robot):
         self.TIME_STEP = TIME_STEP
         self.axel_length = 0.026
         self.dt = 8.5e-6
+        self.positions = []
         
         self.orientation = np.zeros(3)
         self.getDevices()
@@ -101,3 +105,38 @@ class Epuck(Robot):
 
         theta_error = self.rotmat2theta(rotmat_desired@np.transpose(rotmat_now))
         return theta_error
+    
+    def recordPositions(self, *pose):
+        return self.positions.append(np.array(pose))
+        
+    def plotPositions(self, rrt, obstacles):
+        poses = np.array(self.positions)
+        px = [x for x, y in rrt.G.vertices]
+        py = [y for x,y in rrt.G.vertices]
+        
+        fig, ax = plt.subplots(figsize=(16,9))
+        for obs in obstacles:
+            square = Rectangle((obs.pos), obs.side_length, obs.side_length)
+            ax.add_patch(square)
+            
+        ax.scatter(px, py, c='cyan')
+        ax.scatter(rrt.G.startpos[0], rrt.G.startpos[1], c='black')
+        ax.scatter(rrt.G.endpos[0], rrt.G.endpos[1], c='black')
+
+        lines = [(rrt.G.vertices[edge[0]], rrt.G.vertices[edge[1]]) for edge in rrt.G.edges]
+        lc = mc.LineCollection(lines, colors='green', linewidths=2)
+        ax.add_collection(lc)
+        
+        if rrt.path is not None:
+            paths = [(rrt.path[i], rrt.path[i+1]) for i in range(len(rrt.path)-1)]
+            lc2 = mc.LineCollection(paths, colors='black', linewidths=4)
+            ax.add_collection(lc2)
+        
+        ax.plot(poses[:,0], poses[:,1], 'r', linewidth=1)
+        ax.set_xlabel('$x$')
+        ax.set_ylabel('$y$')
+        ax.autoscale()
+        ax.margins(0.2)
+        ax.set_title("Robot's Movement vs Generated Trajectory")
+        plt.grid()
+        plt.show()

@@ -75,33 +75,6 @@ class RRT:
         path.appendleft(np.array(self.G.vertices[curNode]))
         return np.array(path)
 
-    def plot(self):
-        px = [x for x, y in self.G.vertices]
-        py = [y for x,y in self.G.vertices]
-
-        fig, ax = plt.subplots()
-        
-        for obs in self.obstacles:
-            square = Rectangle((obs.pos), obs.side_length, obs.side_length)
-            ax.add_patch(square)
-
-        ax.scatter(px, py, c='cyan')
-        ax.scatter(self.G.startpos[0], self.G.startpos[1], c='black')
-        ax.scatter(self.G.endpos[0], self.G.endpos[1], c='black')
-
-        lines = [(self.G.vertices[edge[0]], self.G.vertices[edge[1]]) for edge in self.G.edges]
-        lc = mc.LineCollection(lines, colors='green', linewidths=2)
-        ax.add_collection(lc)
-
-        if self.path is not None:
-            paths = [(self.path[i], self.path[i+1]) for i in range(len(self.path)-1)]
-            lc2 = mc.LineCollection(paths, colors='black', linewidths=4)
-            ax.add_collection(lc2)
-
-        ax.autoscale()
-        ax.margins(0.2)
-        plt.show()
-
 class Line:
     def __init__(self, pos1, pos2):
         self.pos1 = pos1

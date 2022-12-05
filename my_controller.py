@@ -44,7 +44,7 @@ while epuck.step(TIME_STEP) != -1:
     y_error = target_position[1] - y_now
     
     theta_error = epuck.getThetaError(x_error, y_error, zAngle)
-    
+    epuck.recordPositions(x_now, y_now)
     if now<length-2:
         epuck.follow_trajectory(theta_error)
             
@@ -69,5 +69,6 @@ while epuck.step(TIME_STEP) != -1:
         print(f"\n|| y: {y_now:.4f}\t\t\t\t\t\t||")
         print(f"\n|| Position Error: {np.sqrt(x_error**2+y_error**2):.4f}\t\t\t\t||")
         print("="*52)
+        epuck.plotPositions(rrtku, obstacles)
         break
             
